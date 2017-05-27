@@ -19,7 +19,7 @@ int currentFrame = 0;
 int maxFrames;
 byte bitcheck[] = { (byte)1,(byte)2,(byte)4,(byte)8,(byte)16,(byte)32,(byte)64,(byte)128 };
 boolean debug = false;
-boolean singlestep = true;
+boolean singlestep = false;
 String currentFile = "<none>";
 boolean fileLoaded = false;
  
@@ -41,7 +41,8 @@ void draw() {
   textSize(24);
   text("LED Cube Player - Stefan Kühnel 2017",10,30);
   textSize(14);
-  text("Pressh 'h' to print usage info in console. Current file: "+currentFile,10,height-20);  
+  String singleStepMode = singlestep?" SingleStep: on":" SingleStep: off";
+  text("Pressh 'h' to print usage info in console. Current file: "+currentFile+singleStepMode,10,height-20);  
   translate(width/2,height/2);  
   rotateX(rotx);
   rotateY(roty);
@@ -122,6 +123,7 @@ void loadFile(File selected) {
     currentFrame = 0;
     singlestep=false;
     currentFile=selected.getName();
+    fileLoaded=true;
     cube.initCube();
   } else {
     System.err.println ("Cannot access file.");
