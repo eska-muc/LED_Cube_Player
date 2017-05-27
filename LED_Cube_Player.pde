@@ -1,7 +1,7 @@
 /*
  * 8x8x8 LED Cube
  *
- * Loads files in the format of the xxx editor. See: 
+ * Loads files in the format of the DotMatrixJava editor. See: https://github.com/aguegu/DotMatrixJava 
  *
  * Copyrigth 2017 eskamuc http://github.com/eska-muc
  *
@@ -20,10 +20,12 @@ int maxFrames;
 byte bitcheck[] = { (byte)1,(byte)2,(byte)4,(byte)8,(byte)16,(byte)32,(byte)64,(byte)128 };
 boolean debug = false;
 boolean singlestep = true;
+String currentFile = "<none>";
+boolean fileLoaded = false;
  
 void setup() {
   size(1024,768,P3D);  
-  cube = new Cube();     
+  cube = new Cube();    
 }
 
 void draw() {
@@ -35,6 +37,11 @@ void draw() {
     cube.initCube();
   }
   background(64,64,64);
+  fill(100,100,100);
+  textSize(24);
+  text("LED Cube Player - Stefan Kühnel 2017",10,30);
+  textSize(14);
+  text("Pressh 'h' to print usage info in console. Current file: "+currentFile,10,height-20);  
   translate(width/2,height/2);  
   rotateX(rotx);
   rotateY(roty);
@@ -52,7 +59,7 @@ void keyPressed() {
   if (key=='L'||key=='l') {
     // export
     selectInput("Load .dat file","loadFile");
-  } else if ((key == 'N' || key=='n') && singlestep) {
+  } else if ((key == 'N' || key=='n') && singlestep && fileLoaded) {
     currentFrame = currentFrame + 1;
     if (currentFrame >= maxFrames)  {
       currentFrame = 0;
@@ -62,8 +69,13 @@ void keyPressed() {
     exit();
   } else if (key == 'D' || key=='d') {
     debug = !debug;
+    System.err.printf("Debug output %s\n",debug?"enabled":"disabled");    
   } else if (key == 'S' || key=='s') {
-    singlestep = !singlestep;
+    if (fileLoaded) {
+      singlestep = !singlestep;
+    } else {
+      System.err.println ("No File");
+    }
   }else if (key == 'H' || key=='h') {
     usage();
   }
@@ -83,8 +95,14 @@ void usage() {
 }
 
 void loadFile(File selected) {
+  
   if (selected != null && selected.exists() && selected.isFile() && selected.canRead()) {
-    
+  
+    // Stop animation
+    if (!singlestep) {
+     singlestep = true; 
+    }
+   
     if (!frameList.isEmpty()) {
       frameList.clear();
     }
@@ -102,9 +120,12 @@ void loadFile(File selected) {
       frameList.add(new Frame(frameBuffer));
     }       
     currentFrame = 0;
+    singlestep=false;
+    currentFile=selected.getName();
     cube.initCube();
   } else {
     System.err.println ("Cannot access file.");
+    fileLoaded=false;
   }
   
 }
